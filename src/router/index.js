@@ -1,27 +1,45 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Router from 'vue-router'
 
-Vue.use(VueRouter)
+Vue.use(Router)
 
-const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
-]
-
-const router = new VueRouter({
-  routes
+export default new Router({
+	routes: [
+		{
+            path: '/',
+            redirect: 'standing',
+		},
+		{
+			path: '/login',
+			name: 'login',
+			component: () => import(/* webpackChunkName: "login" */ '../components/Login.vue')
+        },
+        {
+			path: '/standing',
+			name: 'standing',
+			component: () => import(/* webpackChunkName: "standing" */ '../components/Standing.vue')
+		},
+        {
+			path: '/result',
+			name: 'result',
+			component: () => import(/* webpackChunkName: "result" */ '../components/Result.vue')
+        },
+        {
+			path: '/award',
+			name: 'award',
+			component: () => import(/* webpackChunkName: "award" */ '../components/Award.vue')
+		},
+        {
+			path: '/arena',
+			name: 'arena',
+			component: () => import(/* webpackChunkName: "arena" */ '../components/Arena.vue')
+		},
+		// {
+		// 	path: '/details/:id',
+		// 	name: 'details',
+		// 	props: true,
+		// 	component: () => import(/* webpackChunkName: "details" */ '../components/Details.vue')
+		// },
+		
+	]
 })
-
-export default router
