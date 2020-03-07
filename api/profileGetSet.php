@@ -1,21 +1,16 @@
 <?php
 require_once('connection.php');
 
-$sql = "
-	SELECT
-		USER_PROFILE
-	FROM
-		USER
-	WHERE
-		USER_ID = ?
-	ORDER BY USER_NAME
-";
-$rs = executeQuery($db, $sql, [$_POST['USER_ID']]);
-
-echo json_encode([
-	'status' => 'ok',
-	'standings' => $standings,
-	'players' => $rs,
-	'completed' => $completed,
-	'incomplete' => $totalToPlay - $completed
-]);
+if($_POST['USER_IMAGE']) {
+	include 'sub_setProfilepic.php';
+	echo json_encode([
+		'status' => 'ok',
+		'USER_IMAGE' => $filename
+	]);
+}
+else if($_POST['STAT_TARGET_PLAYER_ID']) {
+	include('sub_setUserStat.php');
+	echo json_encode([
+		'status' => 'ok',
+	]);
+}

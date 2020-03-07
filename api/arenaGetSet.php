@@ -8,6 +8,7 @@ if($_POST['type']=='edit') {
 		$_POST['ARENA_ID'],
 	]);
 }
+
 else if($_POST['type']=='new') {
 	
 	//====================================================== generate unique 6 character
@@ -19,50 +20,64 @@ else if($_POST['type']=='new') {
 		if($rs[0]['C']==0) $duplicate = false;
 	}
 	
-	$sql = "
-		INSERT INTO ARENA (
-			ARENA_ID,
-			ARENA_NAME,
-			ARENA_OWNER_USER_ID
-		) VALUES (
-			?, ?, ?
-		)
-	";
-	executeQuery($db, $sql, [
-		$_POST['ARENA_ID'],
-		$_POST['ARENA_NAME'],
-		$_POST['USER_ID']
-	]);
+	//====================================================== add new arena
+	$sql = "INSERT INTO ARENA (ARENA_ID, ARENA_NAME, ARENA_OWNER_USER_ID) VALUES (?, ?, ?)";
+	executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['ARENA_NAME'], $_POST['USER_ID']]);
+	
+	//====================================================== add new arena
+	$sql = "INSERT INTO PLAYER (PLAYER_ARENA_ID, PLAYER_USER_ID) VALUES (?, ?)";
+    executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['USER_ID']]);
+    
+    //========================================================== initiate user stat
+    $sql = "SELECT PLAYER_ID FROM PLAYER WHERE PLAYER_ARENA_ID = ? AND PLAYER_USER_ID = ?";
+    $rs = executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['USER_ID']])[0];
+    $_POST['STAT_TARGET_PLAYER_ID'] = $_POST['STAT_REVIEW_BY_PLAYER_ID'] = $rs['PLAYER_ID'];
+    $_POST['STAT_ATTACK'] = $_POST['STAT_DEFENSE'] = $_POST['STAT_SERVE'] = $_POST['STAT_PLACEMENT'] = $_POST['STAT_FOOTWORK'] = 0;
+    include('sub_setUserStat.php');
 }
+
 else if($_POST['type']=='code') {
 	$sql = "INSERT INTO PLAYER (PLAYER_ARENA_ID, PLAYER_USER_ID) VALUES (?, ?) ON DUPLICATE KEY UPDATE PLAYER_USER_ID = PLAYER_USER_ID";
-	executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['USER_ID']]);
+    executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['USER_ID']]);
+    
+    //========================================================== initiate user stat
+    $sql = "SELECT PLAYER_ID FROM PLAYER WHERE PLAYER_ARENA_ID = ? AND PLAYER_USER_ID = ?";
+    $rs = executeQuery($db, $sql, [$_POST['ARENA_ID'], $_POST['USER_ID']])[0];
+    $_POST['STAT_TARGET_PLAYER_ID'] = $_POST['STAT_REVIEW_BY_PLAYER_ID'] = $rs['PLAYER_ID'];
+    $_POST['STAT_ATTACK'] = $_POST['STAT_DEFENSE'] = $_POST['STAT_SERVE'] = $_POST['STAT_PLACEMENT'] = $_POST['STAT_FOOTWORK'] = 0;
+    include('sub_setUserStat.php');
 }
+
 else if($_POST['type']=='delete') {
 	$sql = "DELETE FROM ARENA WHERE ARENA_ID = ?";
-	executeQuery($db, $sql, [
-		$_POST['ARENA_ID'],
-	]);
+	executeQuery($db, $sql, [$_POST['ARENA_ID']]);
 }
 
 $sql = "
-	SELECT ARENA_ID, ARENA_NAME, 1 IS_OWNER, ARENA_CREATEDDATE
-	FROM ARENA
-	WHERE
-		ARENA_OWNER_USER_ID = ?
-
-	UNION
-	
-	SELECT ARENA_ID, ARENA_NAME, 0 IS_OWNER, ARENA_CREATEDDATE
+    SELECT
+        ARENA_ID,
+        ARENA_NAME,
+        (CASE WHEN ARENA_OWNER_USER_ID = ? THEN 1 ELSE 0 END) IS_OWNER,
+        PLAYER_ID,
+        ARENA_CREATEDDATE
 	FROM ARENA, PLAYER
 	WHERE
 		PLAYER_ARENA_ID = ARENA_ID
-		AND ARENA_OWNER_USER_ID != ?
 		AND PLAYER_USER_ID = ?
-		
 	ORDER BY ARENA_CREATEDDATE DESC
 ";
-$arenas = executeQuery($db, $sql, [$_POST['USER_ID'], $_POST['USER_ID'], $_POST['USER_ID']]);
+$arenas = executeQuery($db, $sql, [$_POST['USER_ID'], $_POST['USER_ID']]);
+
+//========================================================== data migration
+if($arenas[0]['ARENA_ID']=='0B97F3') {
+    array_unshift($arenas,[
+        "ARENA_ID" => '000000',
+        "ARENA_NAME" => 'KeepScore ELO',
+        "IS_OWNER" => 0,
+        "PLAYER_ID" => 0,
+        "ARENA_CREATEDDATE" => null
+    ]);
+}
 
 echo json_encode([
 	'status' => 'ok',

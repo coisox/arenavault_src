@@ -8,5 +8,8 @@ module.exports = {
 			maskIcon: 'img/safari-pinned-tab.svg',
 			msTileImage: 'img/logo144.png',
 		}
-	}
+    },
+    devServer: {
+        host: 'localhost'
+    }
 }

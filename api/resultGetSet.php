@@ -7,24 +7,14 @@ if($_POST['type']=='edit') {
 		UPDATE RESULT SET
 			RESULT_P1_PLAYER_ID = ?,
 			RESULT_P2_PLAYER_ID = ?,
-			RESULT_P1_SET1 = ?,
-			RESULT_P1_SET2 = ?,
-			RESULT_P1_SET3 = ?,
-			RESULT_P2_SET1 = ?,
-			RESULT_P2_SET2 = ?,
-			RESULT_P2_SET3 = ?
+			RESULT_OVERALL = ?
 		WHERE
 			RESULT_ID = ?
 	";
 	executeQuery($db, $sql, [
 		$_POST['RESULT_P1_PLAYER_ID'],
 		$_POST['RESULT_P2_PLAYER_ID'],
-		$_POST['RESULT_P1_SET1'],
-		$_POST['RESULT_P1_SET2'],
-		$_POST['RESULT_P1_SET3'],
-		$_POST['RESULT_P2_SET1'],
-		$_POST['RESULT_P2_SET2'],
-		$_POST['RESULT_P2_SET3'],
+		$_POST['RESULT_OVERALL'],
 		$_POST['RESULT_ID']
 	]);
 }
@@ -36,24 +26,14 @@ else if($_POST['type']=='new') {
 			RESULT_ARENA_ID,
 			RESULT_P1_PLAYER_ID,
 			RESULT_P2_PLAYER_ID,
-			RESULT_P1_SET1,
-			RESULT_P1_SET2,
-			RESULT_P1_SET3,
-			RESULT_P2_SET1,
-			RESULT_P2_SET2,
-			RESULT_P2_SET3
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			RESULT_OVERALL
+		) VALUES (?, ?, ?, ?)
 	";
 	executeQuery($db, $sql, [
 		$_POST['ARENA_ID'],
 		$_POST['RESULT_P1_PLAYER_ID'],
 		$_POST['RESULT_P2_PLAYER_ID'],
-		$_POST['RESULT_P1_SET1'],
-		$_POST['RESULT_P1_SET2'],
-		$_POST['RESULT_P1_SET3'],
-		$_POST['RESULT_P2_SET1'],
-		$_POST['RESULT_P2_SET2'],
-		$_POST['RESULT_P2_SET3']
+		$_POST['RESULT_OVERALL']
 	]);
 }
 
@@ -69,7 +49,6 @@ $sql = "
 		USER_ID,
 		USER_NAME,
 		USER_IMAGE,
-		USER_PROFILE,
 		PLAYER_ID
 	FROM
 		USER,
@@ -81,21 +60,18 @@ $sql = "
 ";
 $players = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
 
-//================================================================== get list of results
+//================================================================== get completed match
 $sql = "
 	SELECT
 		RESULT_ID,
 		RESULT_P1_PLAYER_ID,
-		RESULT_P2_PLAYER_ID,
+        RESULT_P2_PLAYER_ID,
+        CONCAT('|', RESULT_P1_PLAYER_ID, '|', RESULT_P2_PLAYER_ID, '|', RESULT_P1_PLAYER_ID, '|') RESULT_PAIR,
 		(SELECT USER_NAME FROM USER, PLAYER WHERE USER_ID = PLAYER_USER_ID AND PLAYER_ID = RESULT_P1_PLAYER_ID) RESULT_P1_PLAYER_NAME,
 		(SELECT USER_NAME FROM USER, PLAYER WHERE USER_ID = PLAYER_USER_ID AND PLAYER_ID = RESULT_P2_PLAYER_ID) RESULT_P2_PLAYER_NAME,
-		RESULT_P1_SET1,
-		RESULT_P1_SET2,
-		RESULT_P1_SET3,
-		RESULT_P2_SET1,
-		RESULT_P2_SET2,
-		RESULT_P2_SET3,
-		DATE_FORMAT(RESULT_CREATEDDATE, '%d/%m/%Y') CREATEDDATE
+		RESULT_OVERALL,
+        'completed' RESULT_STATUS,
+        DATE_FORMAT(RESULT_CREATEDDATE, '%d/%m/%Y') CREATEDDATE
 	FROM
 		RESULT
 	WHERE
@@ -103,6 +79,28 @@ $sql = "
 	ORDER BY RESULT_CREATEDDATE DESC
 ";
 $results = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
+
+//================================================================== create incomplete match\
+for($x=0; $x<count($results); $x++) {
+    $completedMatches .= $results[$x]['RESULT_PAIR'];
+}
+for($x=0; $x<count($players); $x++) {
+    for($y=$x+1; $y<count($players); $y++) {
+        if($players[$x]['PLAYER_ID']!=$players[$y]['PLAYER_ID'] && !strpos($completedMatches, '|'.$players[$x]['PLAYER_ID'].'|'.$players[$y]['PLAYER_ID'].'|')) {
+            $results[] = [
+                'RESULT_ID' => null,
+                'RESULT_P1_PLAYER_ID' => $players[$x]['PLAYER_ID'],
+                'RESULT_P2_PLAYER_ID' => $players[$y]['PLAYER_ID'],
+                'RESULT_PAIR' => '|'.$players[$x]['PLAYER_ID'].'|'.$players[$y]['PLAYER_ID'].'|'.$players[$x]['PLAYER_ID'].'|',
+                'RESULT_P1_PLAYER_NAME' => $players[$x]['USER_NAME'],
+                'RESULT_P2_PLAYER_NAME' => $players[$y]['USER_NAME'],
+                'RESULT_OVERALL' => null,
+                'RESULT_STATUS' => 'incomplete',
+                'CREATEDDATE' => 'INCOMPLETE',
+            ];
+        }
+    }
+}
 
 echo json_encode([
 	'status' => 'ok',

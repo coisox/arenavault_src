@@ -3,24 +3,27 @@
 
 		<div class="navbar d-flex">
 			<div class="nav-col p-relative d-flex center">
-				<div class="v-middle text-center px-10">
-					<span class="text-small">Filter</span>
+				<div class="v-middle text-center px-10 w-100">
+					<span class="text-small">Filter Player</span>
 					<div>
-						<select v-model="filter.player1" class="outline-purple purple">
+						<select v-model="filter.player" class="outline-purple purple">
+							<option value="">All</option>
 							<option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
 						</select>
 					</div>
 				</div>
 			</div>
 			<div class="nav-col p-relative d-flex">
-				<button class="btn-circle bg-gradient-grey" @click="showModalResult({})"><i class="material-icons-outlined v-middle">add</i></button>
+				<button class="btn-circle" @click="showModalResult({})"><i class="material-icons-outlined v-middle">add</i></button>
 			</div>
 			<div class="nav-col p-relative d-flex center">
-				<div class="v-middle text-center px-10">
-					<span class="text-small">Filter</span>
+				<div class="v-middle text-center px-10 w-100">
+					<span class="text-small">Filter Status</span>
 					<div>
-						<select v-model="filter.player2" class="outline-purple purple">
-							<option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
+						<select v-model="filter.status" class="outline-purple purple">
+                            <option value="">All</option>
+                            <option value="completed">Completed</option>
+                            <option value="incomplete">Incomplete</option>
 						</select>
 					</div>
 				</div>
@@ -28,27 +31,17 @@
 		</div>
 
 		<div class="content">
-			<template v-for="item in results">
-				<div v-if="filterResults(item)" class="table-row" @click="showModalResult(item)" :key="item.RESULT_ID">
-					<div class="table-col-7 truncate">
-						<span class="text-small">{{item.CREATEDDATE}}</span>
+			<template v-for="(item, index) in filteredResults">
+                <div v-if="index==0 || item.CREATEDDATE!=filteredResults[index-1].CREATEDDATE" class="table-header d-flex center" :key="'date'+item.RESULT_ID">{{item.CREATEDDATE}}</div>
+				<div class="table-row" @click="showModalResult(item)" :key="item.RESULT_ID">
+					<div class="table-col-4 truncate text-right">
 						<div class="truncate">{{item.RESULT_P1_PLAYER_NAME}}</div>
+					</div>
+                    <div class="table-col-2 text-center">
+						{{item.RESULT_OVERALL}}
+					</div>
+                    <div class="table-col-4 truncate">
 						<div class="truncate">{{item.RESULT_P2_PLAYER_NAME}}</div>
-					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S1</span>
-						<div>{{item.RESULT_P1_SET1}}</div>
-						<div>{{item.RESULT_P2_SET1}}</div>
-					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S2</span>
-						<div>{{item.RESULT_P1_SET2}}</div>
-						<div>{{item.RESULT_P2_SET2}}</div>
-					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S3</span>
-						<div>{{item.RESULT_P1_SET3 || '-'}}</div>
-						<div>{{item.RESULT_P2_SET3 || '-'}}</div>
 					</div>
 				</div>
 			</template>
@@ -59,36 +52,30 @@
 				<i class="material-icons-outlined btn-close" @click="modalResult.show=false">close</i>
 				<div class="modal-header purple">EDIT RESULT</div>
 				<div class="modal-row d-flex">
-					<div class="table-col-max text-left">
-						<span class="text-small">{{modalResult.CREATEDDATE}}</span>
-						<div class="mt-10">
-							<select v-model="modalResult.RESULT_P1_PLAYER_ID" class="outline-purple purple">
-								<option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
-							</select>
-						</div>
-						<div class="mt-10">
-							<select v-model="modalResult.RESULT_P2_PLAYER_ID" class="outline-purple purple">
-								<option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
-							</select>
-						</div>
+					<div class="table-col-3 text-left pt-10 p-relative">Winner<i class="material-icons-outlined btn-swap purple" @click="swap">swap_horiz</i></div>
+					<div class="table-col-max">
+                        <select v-model="modalResult.RESULT_P1_PLAYER_ID" class="outline-purple purple">
+                            <option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
+                        </select>
 					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S1</span>
-						<div class="mt-10"><input type="text" class="" v-model="modalResult.RESULT_P1_SET1"></div>
-						<div class="mt-10"><input type="text" v-model="modalResult.RESULT_P2_SET1"></div>
+                </div>
+                <div class="modal-row d-flex">
+					<div class="table-col-3 text-left pt-10">Loser</div>
+					<div class="table-col-max">
+                        <select v-model="modalResult.RESULT_P2_PLAYER_ID" class="outline-purple purple">
+                            <option v-for="item in players" :key="item.PLAYER_ID" :value="item.PLAYER_ID">{{item.USER_NAME}}</option>
+                        </select>
 					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S2</span>
-						<div class="mt-10"><input type="text" v-model="modalResult.RESULT_P1_SET2"></div>
-						<div class="mt-10"><input type="text" v-model="modalResult.RESULT_P2_SET2"></div>
-					</div>
-					<div class="table-col-1 text-center">
-						<span class="text-small">S3</span>
-						<div class="mt-10"><input type="text" v-model="modalResult.RESULT_P1_SET3"></div>
-						<div class="mt-10"><input type="text" v-model="modalResult.RESULT_P2_SET3"></div>
-					</div>
-				</div>
-				<div class="modal-row d-flex center">
+                </div>
+                <div class="modal-row d-flex">
+                    <div class="table-col-3 text-left pt-10">Result</div>
+                    <div class="table-col-max d-flex">
+                        <button :class="{'bg-gradient-purple white': modalResult.RESULT_OVERALL=='2-0', 'bg-gradient-grey': modalResult.RESULT_OVERALL!='2-0'}" @click="modalResult.RESULT_OVERALL='2-0'">2-0</button>
+                        <button :class="{'bg-gradient-purple white': modalResult.RESULT_OVERALL=='2-1', 'bg-gradient-grey': modalResult.RESULT_OVERALL!='2-1'}" @click="modalResult.RESULT_OVERALL='2-1'">2-1</button>
+                    </div>
+                </div>
+                <div class="divider mt-10"></div>
+				<div class="modal-footer d-flex center">
 					<button class="bg-gradient-purple" @click="saveModalResult"><i class="material-icons-outlined v-middle white">check</i> <span class="v-middle white">SAVE</span></button>
 					<button class="bg-gradient-red" @click="deleteResult" v-if="modalResult.RESULT_ID"><i class="material-icons-outlined v-middle white">delete</i> <span class="v-middle white">DELETE</span></button>
 				</div>
@@ -107,6 +94,18 @@
 		border: 1px solid grey;
 		border-radius: 6px;
 	}
+    .table-header + .table-row,
+    .table-row + .table-header
+    {
+        margin-top: 10px;
+    }
+    .btn-swap {
+        position: absolute;
+        top: 24px;
+        left: 0;
+        transform: rotate(90deg);
+        padding: 10px;
+    }
 </style>
 
 <script>
@@ -114,8 +113,8 @@ export default {
 	data() {
 		return {
 			filter: {
-				player1: '',
-				player2: ''
+				player: '',
+				status: 'completed'
 			},
 			players: [],
 			results: [],
@@ -125,13 +124,8 @@ export default {
 				RESULT_ID: '',
 				RESULT_P1_PLAYER_ID: '',
 				RESULT_P2_PLAYER_ID: '',
-				RESULT_P1_SET1: '',
-				RESULT_P1_SET2: '',
-				RESULT_P1_SET3: '',
-				RESULT_P2_SET1: '',
-				RESULT_P2_SET2: '',
-				RESULT_P2_SET3: '',
-			}
+                RESULT_OVERALL: '',
+            },
 		};
 	},
 	props: ['session', 'apiurl'],
@@ -150,9 +144,6 @@ export default {
 				if(response.status=='ok') {
 					self.players = response.players
 					self.results = response.results
-
-					self.players.unshift({PLAYER_ID:'', USER_NAME:''})
-					// for(var i=0; i<self.players.length; i++) self.players[i]['USER_NAME'] = self.ellipsis(self.players[i]['USER_NAME'], 14)
 				}
 				else {
 					console.log('Fail to get results')
@@ -160,18 +151,18 @@ export default {
 			})
 		},
 		saveModalResult() {
+            if(!this.modalResult.RESULT_P1_PLAYER_ID || !this.modalResult.RESULT_P2_PLAYER_ID || !this.modalResult.RESULT_OVERALL) {
+                this.$emit('showToast', 'Please complete the details!')
+                return
+            }
+
 			var self = this
 			var formData = new FormData()
 			formData.append('ARENA_ID', self.session.ARENA_ID)
 			formData.append('RESULT_ID', self.modalResult.RESULT_ID||'')
 			formData.append('RESULT_P1_PLAYER_ID', self.modalResult.RESULT_P1_PLAYER_ID)
 			formData.append('RESULT_P2_PLAYER_ID', self.modalResult.RESULT_P2_PLAYER_ID)
-			formData.append('RESULT_P1_SET1', self.modalResult.RESULT_P1_SET1)
-			formData.append('RESULT_P1_SET2', self.modalResult.RESULT_P1_SET2)
-			if(self.modalResult.RESULT_P1_SET3) formData.append('RESULT_P1_SET3', self.modalResult.RESULT_P1_SET3)
-			formData.append('RESULT_P2_SET1', self.modalResult.RESULT_P2_SET1)
-			formData.append('RESULT_P2_SET2', self.modalResult.RESULT_P2_SET2)
-			if(self.modalResult.RESULT_P2_SET3) formData.append('RESULT_P2_SET3', self.modalResult.RESULT_P2_SET3)
+			formData.append('RESULT_OVERALL', self.modalResult.RESULT_OVERALL)
 			formData.append('type', self.modalResult.RESULT_ID?'edit':'new')
 
 			fetch(self.apiurl+'resultGetSet.php', {
@@ -217,25 +208,33 @@ export default {
 			if(text.length>cap) t += '...'
 			return t
 		},
-		filterResults(item) {
-			var searchString = item.RESULT_P1_PLAYER_ID + '_' + item.RESULT_P2_PLAYER_ID
-			if(searchString.indexOf(this.filter.player1)>-1 && searchString.indexOf(this.filter.player2)>-1) return true
-			return false
-		},
 		showModalResult(item) {
 			this.modalResult.CREATEDDATE = item.CREATEDDATE
 			this.modalResult.RESULT_ID = item.RESULT_ID
 			this.modalResult.RESULT_P1_PLAYER_ID = item.RESULT_P1_PLAYER_ID
 			this.modalResult.RESULT_P2_PLAYER_ID = item.RESULT_P2_PLAYER_ID
-			this.modalResult.RESULT_P1_SET1 = item.RESULT_P1_SET1
-			this.modalResult.RESULT_P1_SET2 = item.RESULT_P1_SET2
-			this.modalResult.RESULT_P1_SET3 = item.RESULT_P1_SET3
-			this.modalResult.RESULT_P2_SET1 = item.RESULT_P2_SET1
-			this.modalResult.RESULT_P2_SET2 = item.RESULT_P2_SET2
-			this.modalResult.RESULT_P2_SET3 = item.RESULT_P2_SET3
+			this.modalResult.RESULT_OVERALL = item.RESULT_OVERALL
 			this.modalResult.show = true
-		},
+        },
+        swap() {
+            var temp = this.modalResult.RESULT_P1_PLAYER_ID
+            this.modalResult.RESULT_P1_PLAYER_ID = this.modalResult.RESULT_P2_PLAYER_ID
+            this.modalResult.RESULT_P2_PLAYER_ID = temp
+        }
 	},
+    computed: {
+        filteredResults() {
+            var results = []
+            var self = this
+            self.results.forEach(function(item, i) {
+                if(
+                    (self.filter.player=='' || self.filter.player==item.RESULT_P1_PLAYER_ID || self.filter.player==item.RESULT_P2_PLAYER_ID) &&
+                    (self.filter.status=='' || self.filter.status==item.RESULT_STATUS)
+                ) results.push(item)
+            })
+			return results
+		},
+    },
 	mounted() {
 		this.getResults()
 	}

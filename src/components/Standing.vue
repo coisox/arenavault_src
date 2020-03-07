@@ -1,7 +1,9 @@
 <template>
 	<div class="p-absolute page bg-gradient-red">
+		
+		<img v-for="item in standings" class="preload" :src="item.USER_IMAGE" :key="item.PLAYER_ID">
 
-        <div class="navbar d-flex">
+		<div class="navbar d-flex">
 			<div class="nav-col p-relative d-flex center">
 				<div class="v-middle text-center">
 					<span class="text-small">Completed</span>
@@ -9,7 +11,7 @@
 				</div>
 			</div>
 			<div class="nav-col p-relative d-flex">
-				<div class="btn-circle bg-gradient-grey"><span>{{Math.round(completed/(completed+incomplete)*100)}}%</span></div>
+				<div class="btn-circle"><span>{{percentage}}%</span></div>
 			</div>
 			<div class="nav-col p-relative d-flex center">
 				<div class="v-middle text-center">
@@ -19,120 +21,218 @@
 			</div>
 		</div>
 
-        <div class="content">
-            <div class="table-header p-fixed">
+		<div class="content">
+			<div class="table-header p-fixed">
 				<div class="table-col-1">#</div>
-				<div class="table-col-5">PLAYER</div>
-				<div class="table-col-1 text-center"></div>
-				<div class="table-col-1 text-center">G</div>
-				<div class="table-col-1 text-center">W</div>
-				<div class="table-col-1 text-center">L</div>
+                <template v-if="session.ARENA_ID=='000000'">
+                    <div class="table-col-4">PLAYER</div>
+                    <div class="table-col-2 text-center">E</div>
+                    <div class="table-col-2 text-center">G</div>
+                    <div class="table-col-1 text-center">%</div>
+                </template>
+                <template v-else>
+				    <div class="table-col-5">PLAYER</div>
+                    <div class="table-col-1 text-center"></div><!-- icon level -->
+                    <div class="table-col-1 text-center">G</div>
+                    <div class="table-col-1 text-center">W</div>
+                    <div class="table-col-1 text-center">L</div>
+                </template>
 			</div>
-			<div class="table-row" v-for="(item, index) in standings" :key="item.USER_ID" @click="showModalProfile(item)">
+			<div class="table-row" v-for="(item, index) in standings" :key="item.USER_ID" @click="showModalProfile(item.USER_ID)">
 				<div class="table-col-1">{{index+1}}</div>
-				<div class="table-col-5 truncate">{{item.USER_NAME}}</div>
-				<div class="table-col-1 p-relative">
-                    <template v-if="item.LEVEL"><img class="icon-level" :src="'img/level_'+item.LEVEL+'.png'"></template>
-                </div>
-				<div class="table-col-1 text-center">{{item.WIN+item.LOSE}}</div>
-				<div class="table-col-1 text-center">{{item.WIN}}</div>
-				<div class="table-col-1 text-center">{{item.LOSE}}</div>
+                <template v-if="session.ARENA_ID=='000000'">
+				    <div class="table-col-4 truncate">{{item.USER_NAME}}</div>
+                    <div class="table-col-2 text-center">{{item.ELO}}</div>
+                    <div class="table-col-2 text-center">{{item.GAME}}</div>
+                    <div class="table-col-1 text-center">{{item.PERCENTAGE}}</div>
+                </template>
+                <template v-else>
+                    <div class="table-col-5 truncate">{{item.USER_NAME}}</div>
+                    <div class="table-col-1 p-relative"><img v-if="item.LEVEL" class="icon-level" :src="'img/icons8-'+item.LEVEL+'-50.png'"></div>
+                    <div class="table-col-1 text-center">{{item.WIN+item.LOSE}}</div>
+                    <div class="table-col-1 text-center">{{item.WIN}}</div>
+                    <div class="table-col-1 text-center">{{item.LOSE}}</div>
+                </template>
 			</div>
 		</div>
-        
-        <div class="modal-overlay" :class="{'active':modal.show}" @click.self="modal.show=false">
+
+		<div class="modal-overlay" :class="{'active':modalProfile.show}" @click.self="modalProfile.show=false">
 			<div class="modal">
-                <i class="material-icons-outlined btn-close" @click="modal.show=false">close</i>
-                <template v-if="modal.LEVEL">
-                    <img class="bg-level" :src="'img/level_'+modal.LEVEL+'.png'">
-                </template>
+				<i class="material-icons-outlined btn-close" @click="modalProfile.show=false">close</i>
+				<template v-if="modalProfile.LEVEL">
+					<img class="bg-level" :src="'img/emblem_'+modalProfile.LEVEL+'.png'">
+				</template>
 				<div class="modal-header red truncate">
-                    {{modal.USER_NAME}}<br><br>
-                    <img class="profilepic" :src="modal.USER_IMAGE">
-                </div>
-                <div class="modal-row p-relative">
-                    <div class="d-flex space-between p-absolute text-small"><span>Unlikely</span><span>Habit</span></div>
-                    <b>CHOP</b><img class="xiom" :src="'img/xiom_'+modal.USER_PROFILE.CHOP+'.svg'">
-                </div>
-                <div class="modal-row p-relative">
-                    <div class="d-flex space-between p-absolute text-small"><span>Unlikely</span><span>Habit</span></div>
-                    <b>LOOP</b><img class="xiom" :src="'img/xiom_'+modal.USER_PROFILE.LOOP+'.svg'">
-                </div>
-                <div class="modal-row p-relative">
-                    <div class="d-flex space-between p-absolute text-small"><span>Simple</span><span>Complex</span></div>
-                    <b>SERVE</b><img class="xiom" :src="'img/xiom_'+modal.USER_PROFILE.SERVE+'.svg'">
-                </div>
-                <div class="modal-row p-relative">
-                    <div class="d-flex space-between p-absolute text-small"><span>Control</span><span>Aggresive</span></div>
-                    <b>SMASH</b><img class="xiom" :src="'img/xiom_'+modal.USER_PROFILE.SMASH+'.svg'">
-                </div>
-                <div class="modal-row p-relative">
-                    <div class="d-flex space-between p-absolute text-small"><span>Random</span><span>Utilize</span></div>
-                    <b>PLACING</b><img class="xiom" :src="'img/xiom_'+modal.USER_PROFILE.PLACING+'.svg'">
-                </div>
-                <div class="modal-row">
-                    <b>WIN STREAK:</b> {{modal.WIN_STREAK>1?modal.WIN_STREAK:0}}
-                    <b class="ml-30">LOSE STREAK:</b> {{modal.LOSE_STREAK>1?modal.LOSE_STREAK:0}}
-                </div>
+					{{modalProfile.USER_NAME}}<br><br>
+					<div class="p-relative d-inline-block">
+						<img class="profilepic" :src="modalProfile.USER_IMAGE">
+						<input v-if="modalProfile.USER_ID==session.USER_ID" id="inputProfilepic" type="file" accept="image/*" @change="uploadProfilepic">
+					</div>
+				</div>
+                <table width="100%" border="0" cellspacing="0" class="mt-10">
+                    <tr>
+                        <td>WIN STREAK</td>
+                        <td>
+                            <div class="d-flex space-between" style="margin:0 -2px">
+                                <i v-for="i in (modalProfile.WIN_STREAK)" class="material-icons-outlined red" :key="'s'+i">star</i>
+                                <i v-for="i in (5-modalProfile.WIN_STREAK)" class="material-icons-outlined" :key="'o'+i">star_outline</i>
+                            </div>
+                            <!-- <span>Win {{modalProfile.WIN_STREAK>1?modalProfile.WIN_STREAK:0}}</span>
+                            <span>Lose {{modalProfile.LOSE_STREAK>1?modalProfile.LOSE_STREAK:0}}</span> -->
+                        </td>
+                    </tr>
+                    <tr v-for="(value, key) in modalRate.type" :key="key" @click="showModalRate">
+                        <td>{{key}}</td>
+                        <td v-if="modalProfile.show">
+                            <div class="d-flex space-between" style="margin:0 -2px">
+                                <i v-for="i in modalProfile.STAT_AVERAGE[key]" class="material-icons-outlined red" :key="'s'+i">star</i>
+                                <i v-for="i in (5-modalProfile.STAT_AVERAGE[key])" class="material-icons-outlined" :key="'o'+i">star_outline</i>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
 			</div>
+		</div>
+
+		<div class="modal-overlay" :class="{'active':modalRate.show}" @click.self="modalRate.show=false">
+			<div class="modal">
+				<i class="material-icons-outlined btn-close" @click="modalRate.show=false">close</i>
+				<div class="modal-header red truncate">{{modalProfile.USER_NAME}}</div>
+				<div class="modal-row">Your review for this player</div>
+				<div v-for="(value, key) in modalRate.type" class="modal-row d-flex space-between" :key="key">
+					<div>{{key}}</div>
+					<div v-if="modalRate.show" style="margin:0 -2px">
+						<i v-for="i in modalRate.type[key]" class="material-icons-outlined red" :key="'s'+i" @click="modalRate.type[key]=i">star</i>
+						<i v-for="i in (5-modalRate.type[key])" class="material-icons-outlined" :key="'o'+i" @click="modalRate.type[key]=i+modalRate.type[key]">star_outline</i>
+					</div>	
+				</div>
+				<!-- <template v-for="(value, key) in modalRate.type">
+					<div class="modal-row d-flex center" :class="{'mt-20':key=='ATTACK'}" :key="key">
+						<div class="table-col-4 text-left">{{key}}</div>
+						<div class="table-col-max d-flex">
+							<button v-for="r in [1,2,3]" :key="r" @click="modalRate.type[key]=r" :class="{'bg-gradient-red white':modalRate.type[key]==r, 'bg-gradient-grey':modalRate.type[key]!=r}">{{r}}</button>
+						</div>
+					</div>
+				</template> -->
+				<div class="divider mt-10"></div>
+				<div class="modal-footer d-flex center">
+					<button class="bg-gradient-red" @click="saveModalRate"><i class="material-icons-outlined v-middle white">check</i> <span class="v-middle white">SAVE</span></button>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-overlay" :class="{'active':modalTipsProfile.show}" @click.self="modalTipsProfile.show=false">
+			<i class="material-icons-outlined btn-close white" @click="modalTipsProfile.show=false">close</i>
+			<div class="p-absolute white tips-1 text-center"><img src="img/tips_click.svg"><br>Click here to change profilepic if this player is you.</div>
+			<div class="p-absolute white tips-2 text-center">
+				<img src="img/tips_click.svg"><br>
+				Click here to review player including yourself. Player stats are based on average of all reviews.
+			</div>
+		</div>
+
+		<div class="modal-overlay" :class="{'active':modalTipsStanding.show}" @click.self="modalTipsStanding.show=false">
+			<i class="material-icons-outlined btn-close white" @click="modalTipsStanding.show=false">close</i>
+			<div class="p-absolute white tips-3 text-center"><img src="img/tips_arrow.svg"><br>This is arena's completed matches percentage.</div>
+			<div class="p-absolute white tips-4 text-center"><img src="img/tips_click.svg"><br>Click on player's name to see profile.</div>
+			<!-- <div class="p-absolute white tips-4 text-center"><img src="img/tips_arrow.svg"><br>Player's standing is ordered by number of game win minus lose, followed by number of set win minus lose.<br><br>Players that yet to play will be placed at bottom.<br><br>Click on player's name to see profile.</div> -->
 		</div>
 
 	</div>
 </template>
 
 <style>
-    .ct-series-a path.ct-slice-donut-solid {
-        fill: #E9203E;
-    }
-    .ct-series-b path.ct-slice-donut-solid {
-        fill: #9E9E9E;
-    }
+	.ct-series-a path.ct-slice-donut-solid {
+		fill: #E9203E;
+	}
+	.ct-series-b path.ct-slice-donut-solid {
+		fill: #9E9E9E;
+	}
 </style>
 <style scoped>
-    .icon-level {
-        position: absolute;
-        height: 24px;
-        top: -12px;
-        left: 0;
+	.tips-1 {
+		margin-top: 118px;
+	}
+	.tips-2 {
+		margin-top: 295px;
+	}
+	.tips-3 {
+		margin-top: 50px;
+	}
+	.tips-4 {
+		margin-top: 250px;
+	}
+    table td {
+        padding: 5px 0;
+        height: 28px;
     }
-    .btn-circle span {
+    table td:first-child {
+        width: 50%;
+    }
+	.table-header + .table-row {
+		margin-top: 57px;
+	}
+	.icon-level {
+		position: absolute;
+		height: 22px;
+		top: -11px;
+		left: 6px;
+	}
+	#inputProfilepic {
+		position: absolute;
+		opacity: 0;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.btn-circle span {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	.modal-header {
+		z-index: 2;
+	}
+	.profilepic {
+		width: 96px;
+		height: 96px;
+		border-radius: 50%;
+		border: 6px solid #E0E0E0;
+		margin-bottom: 4px;
+	}
+	.bg-level {
         position: absolute;
-        top: 50%;
+        top: 165px;
         left: 50%;
-        transform: translate(-50%, -50%);
-    }
-    .modal-header {
-        z-index: 2;
-    }
-    .profilepic {
-        width: 96px;
-        border-radius: 50%;
-        border: 6px solid #E0E0E0;
-        margin-bottom: 4px;
-    }
-    .bg-level {
-        position: absolute;
-        top: 180px;
-        left: 50%;
-        width: calc(100vw - 88px);
+        width: calc(100vw - 120px);
+        -webkit-transform: translateX(-50%);
         transform: translateX(-50%);
-        opacity: .1;
+        opacity: .07;
         z-index: 1;
-    }
-    .xiom {
-        width: 100%;
-    }
-    .d-flex.space-between.p-absolute {
-        width: 100%;
-        top: 15px;
-    }
-    .d-flex.space-between.p-absolute span {
-        background-color: white;
-        padding: 0 5px;
-    }
-    .modal {
-        margin-top: 24px;
-    }
+        pointer-events: none;
+	}
+	[class^=xiom] {
+		width: calc(100vw - 88px);
+		height: calc(7.5vw - 6.6px);
+		background-size: 102%;
+		background-repeat: no-repeat;
+		background-position: center center;
+	}
+	.xiom-0 { background-image: url(/img/xiom_0.svg) }
+	.xiom-1 { background-image: url(/img/xiom_1.svg) }
+	.xiom-2 { background-image: url(/img/xiom_2.svg) }
+	.xiom-3 { background-image: url(/img/xiom_3.svg) }
+	.stat-minmax {
+		width: 100%;
+		margin-top: 15px;
+	}
+	.stat-minmax span {
+		background-color: white;
+	}
+	.modal {
+		margin-top: 24px;
+	}
 </style>
 
 <script>
@@ -140,29 +240,48 @@ export default {
 	data() {
 		return {
 			filter: {
-                player1: '',
-                player2: ''
-            },
-            standings: [],
-            players: [],
-            completed: 0,
-            incomplete: 0,
-            modal: {
-                show: false,
-                USER_NAME: '',
-                USER_IMAGE: '',
-                USER_PROFILE: {},
-                LEVEL: '',
-                WIN_STREAK: 0,
-                LOSE_STREAK: 0,
-            }
-		};
-    },
-    props: ['session', 'apiurl'],
+				player1: '',
+				player2: ''
+			},
+			standings: [],
+			completed: 0,
+			incomplete: 0,
+			percentage: 0,
+			modalProfile: {
+				show: false,
+				USER_ID: '',
+				USER_NAME: '',
+				USER_IMAGE: '',
+				STAT_AVERAGE: {},
+				STAT_REVIEW_BY_ME: {},
+				LEVEL: '',
+				WIN_STREAK: 0,
+				LOSE_STREAK: 0,
+			},
+			modalRate: {
+				show: false,
+				type: {
+					ATTACK: null,
+					DEFENSE: null,
+					SERVE: null,
+					PLACEMENT: null,
+					FOOTWORK: null,
+				}
+			},
+			modalTipsProfile: {
+				show: false,
+			},
+			modalTipsStanding: {
+				show: false,
+			},
+		}
+	},
+	props: ['session', 'tips', 'apiurl'],
 	methods: {
-		getStanding() {
-            var self = this
+		getStandings() {
+			var self = this
 			var formData = new FormData()
+			formData.append('PLAYER_ID', self.session.PLAYER_ID)
 			formData.append('ARENA_ID', self.session.ARENA_ID)
 
 			fetch(self.apiurl+'standingGetSet.php', {
@@ -172,46 +291,152 @@ export default {
 				return response.json()
 			}).then(function(response) {
 				if(response.status=='ok') {
-                    self.players = response.players
-                    self.completed = response.completed
-                    self.incomplete = response.incomplete
+					self.completed = response.completed
+					self.incomplete = response.incomplete
+					self.percentage = response.percentage
 
-                    var taffy = TAFFY(response.standings)
-                    self.standings = taffy().order('PLAYED desc, GAME_DIFF desc, SET_DIFF desc, POINT_DIFF desc').get()
+					var taffy = TAFFY(response.standings)
+					self.standings = taffy().order('PLAYED desc, GAME_DIFF desc, SET_DIFF desc').get()
 
-                    new Chartist.Pie('.btn-circle', {
-                        series: [response.completed, response.incomplete]
-                    }, {
-                        donut: true,
-                        donutWidth: 6,
-                        donutSolid: true,
-                        showLabel: false
-                    })
+					new Chartist.Pie('.btn-circle', {
+						series: [response.completed, response.incomplete]
+					}, {
+						donut: true,
+						donutWidth: 6,
+						donutSolid: true,
+						showLabel: false
+					})
 				}
 				else {
 					console.log('Fail to get standing')
 				}
 			})
-        },
-        showModalProfile(item) {
-            console.log('showModalProfile: ', item)
-            for(var i=0; i<this.players.length; i++) {
-                if(this.players[i].USER_ID==item.USER_ID) {
-                    this.modal.USER_NAME = this.players[i].USER_NAME
-                    this.modal.USER_IMAGE = this.players[i].USER_IMAGE
-                    this.modal.USER_PROFILE = JSON.parse(this.players[i].USER_PROFILE)
-                    this.modal.LEVEL = item.LEVEL
-                    this.modal.WIN_STREAK = item.WIN_STREAK
-                    this.modal.LOSE_STREAK = item.LOSE_STREAK
-                    this.modal.show = true
-                    
-                    break
-                }
+		},
+		showModalProfile(USER_ID) {
+            if(this.session.ARENA_ID=='000000') {
+                this.$emit('showToast', 'No profile data for data migration')
+                return
             }
-        }
+
+			for(var i=0; i<this.standings.length; i++) {
+				if(this.standings[i].USER_ID==USER_ID) {
+					this.modalProfile.USER_ID = this.standings[i].USER_ID
+					this.modalProfile.PLAYER_ID = this.standings[i].PLAYER_ID
+					this.modalProfile.USER_NAME = this.standings[i].USER_NAME
+					this.modalProfile.USER_IMAGE = this.standings[i].USER_IMAGE
+					this.modalProfile.STAT_AVERAGE = this.standings[i].STAT_AVERAGE
+					this.modalProfile.STAT_REVIEW_BY_ME = this.standings[i].STAT_REVIEW_BY_ME
+                    this.modalProfile.LEVEL = this.standings[i].LEVEL
+                    this.modalProfile.WIN_STREAK = this.standings[i].WIN_STREAK
+                    
+                    if(this.modalProfile.WIN_STREAK>5) this.modalProfile.WIN_STREAK = 5
+                    
+					this.modalProfile.show = true
+					break
+				}
+			}
+			
+			if(!this.tips.profile) {
+				this.$emit('updateTips', 'profile')
+				this.modalTipsProfile.show = true
+			}
+		},
+		uploadProfilepic() {
+			var self = this
+
+			var filePicker = document.getElementById('inputProfilepic')
+			if(!filePicker || !filePicker.files || filePicker.files.length <= 0) return
+			var myFile = filePicker.files[0]
+
+			var reader = new FileReader()
+			reader.readAsDataURL(myFile)
+			reader.onload = function() {
+
+				var img = document.createElement('img');
+				img.onload = function(){		
+					//========================================================== resize
+					var canvas = document.createElement('canvas')
+					var ctx = canvas.getContext('2d')
+					canvas.width = canvas.height = 96
+					ctx.drawImage(this, 0, 0, canvas.width, canvas.width)
+					var dataURI = canvas.toDataURL()
+
+					//========================================================== upload
+					var formData = new FormData()
+					formData.append('USER_GMAIL', self.session.USER_GMAIL)
+					formData.append('USER_IMAGE', dataURI)
+
+					fetch(self.apiurl+'profileGetSet.php', {
+						method: 'post',
+						body: formData
+					}).then(function(response) {
+						return response.json()
+					}).then(function(response) {
+						if(response.status=='ok') {
+							for(var i=0; i<self.standings.length; i++) {
+								if(self.standings[i].USER_ID==self.session.USER_ID) {
+									self.standings[i].USER_IMAGE = response.USER_IMAGE
+									self.modalProfile.USER_IMAGE = self.standings[i].USER_IMAGE
+									break
+								}
+							}
+						}
+						else {
+							console.log('Fail to update profile')
+						}
+					})
+
+				}
+				img.src = reader.result
+			}
+			reader.onerror = function (error) {
+				console.log('uploadProfilepic failed: ', error)
+			}
+		},
+		showModalRate() {
+			console.log(this.modalProfile.STAT_REVIEW_BY_ME)
+			this.modalRate.type.ATTACK = this.modalProfile.STAT_REVIEW_BY_ME.ATTACK || 1
+			this.modalRate.type.DEFENSE = this.modalProfile.STAT_REVIEW_BY_ME.DEFENSE || 1
+			this.modalRate.type.SERVE = this.modalProfile.STAT_REVIEW_BY_ME.SERVE || 1
+			this.modalRate.type.PLACEMENT = this.modalProfile.STAT_REVIEW_BY_ME.PLACEMENT || 1
+			this.modalRate.type.FOOTWORK = this.modalProfile.STAT_REVIEW_BY_ME.FOOTWORK || 1
+			this.modalRate.show = true
+		},
+		saveModalRate() {
+			var self = this
+			var formData = new FormData()
+			formData.append('PLAYER_ID', self.session.PLAYER_ID)
+			formData.append('STAT_TARGET_PLAYER_ID', self.modalProfile.PLAYER_ID)
+			formData.append('STAT_ATTACK', self.modalRate.type.ATTACK)
+			formData.append('STAT_DEFENSE', self.modalRate.type.DEFENSE)
+			formData.append('STAT_SERVE', self.modalRate.type.SERVE)
+			formData.append('STAT_PLACEMENT', self.modalRate.type.PLACEMENT)
+			formData.append('STAT_FOOTWORK', self.modalRate.type.FOOTWORK)
+
+			fetch(self.apiurl+'profileGetSet.php', {
+				method: 'post',
+				body: formData
+			}).then(function(response) {
+				return response.json()
+			}).then(function(response) {
+				if(response.status=='ok') {
+					self.getStandings()
+					self.modalProfile.show = false
+					self.modalRate.show = false
+				}
+				else {
+					console.log('Fail to set profile')
+				}
+			})
+		}
 	},
 	mounted() {
-        this.getStanding()
+		this.getStandings()
+		
+		if(!this.tips.standing) {
+			this.$emit('updateTips', 'standing')
+			this.modalTipsStanding.show = true
+		}
 	}
 };
 </script>

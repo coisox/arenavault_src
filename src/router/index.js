@@ -25,9 +25,9 @@ export default new Router({
 			component: () => import(/* webpackChunkName: "result" */ '../components/Result.vue')
         },
         {
-			path: '/award',
-			name: 'award',
-			component: () => import(/* webpackChunkName: "award" */ '../components/Award.vue')
+			path: '/emblem',
+			name: 'emblem',
+			component: () => import(/* webpackChunkName: "emblem" */ '../components/Emblem.vue')
 		},
         {
 			path: '/arena',

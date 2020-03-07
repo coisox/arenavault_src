@@ -56,7 +56,7 @@ export default {
             }).then(function(response) {
                 if(response.status=='ok') {
                     self.$emit('updateSession', response.user)
-                    self.$router.push('/')
+                    self.$router.push('/arena')
                 }
                 else {
                     console.log('Fail to login')
