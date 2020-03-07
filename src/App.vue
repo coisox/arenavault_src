@@ -323,7 +323,7 @@ export default {
 	name: "App",
 	data() {
 		return {
-            version: 'v20200307',
+            version: 'v20200307b',
             session: {},
             tips: {},
             apiurl: location.href.indexOf('localhost')>-1?'http://127.0.0.1//my/arenavault/api/':'https://coisox.toyyib.la/',
