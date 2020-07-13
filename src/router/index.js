@@ -30,6 +30,11 @@ export default new Router({
 			component: () => import(/* webpackChunkName: "emblem" */ '../components/Emblem.vue')
 		},
         {
+			path: '/player',
+			name: 'player',
+			component: () => import(/* webpackChunkName: "player" */ '../components/Player.vue')
+		},
+        {
 			path: '/arena',
 			name: 'arena',
 			component: () => import(/* webpackChunkName: "arena" */ '../components/Arena.vue')

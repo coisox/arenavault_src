@@ -11,7 +11,7 @@ if($_POST['type']=='edit') {
 		WHERE
 			RESULT_ID = ?
 	";
-	executeQuery($db, $sql, [
+	executeQuery($sql, [
 		$_POST['RESULT_P1_PLAYER_ID'],
 		$_POST['RESULT_P2_PLAYER_ID'],
 		$_POST['RESULT_OVERALL'],
@@ -29,7 +29,7 @@ else if($_POST['type']=='new') {
 			RESULT_OVERALL
 		) VALUES (?, ?, ?, ?)
 	";
-	executeQuery($db, $sql, [
+	executeQuery($sql, [
 		$_POST['ARENA_ID'],
 		$_POST['RESULT_P1_PLAYER_ID'],
 		$_POST['RESULT_P2_PLAYER_ID'],
@@ -40,7 +40,7 @@ else if($_POST['type']=='new') {
 //================================================================== delete
 else if($_POST['type']=='delete') {
 	$sql = "DELETE FROM RESULT WHERE RESULT_ID = ?";
-	executeQuery($db, $sql, [$_POST['RESULT_ID']]);
+	executeQuery($sql, [$_POST['RESULT_ID']]);
 }
 
 //================================================================== get list of players
@@ -58,7 +58,7 @@ $sql = "
 		AND PLAYER_ARENA_ID = ?
 	ORDER BY USER_NAME
 ";
-$players = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
+$players = executeQuery($sql, [$_POST['ARENA_ID']]);
 
 //================================================================== get completed match
 $sql = "
@@ -78,7 +78,7 @@ $sql = "
 		RESULT_ARENA_ID = ?
 	ORDER BY RESULT_CREATEDDATE DESC
 ";
-$results = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
+$results = executeQuery($sql, [$_POST['ARENA_ID']]);
 
 //================================================================== create incomplete match\
 for($x=0; $x<count($results); $x++) {

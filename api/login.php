@@ -14,7 +14,7 @@ $sql = "
 		?, ?
 	) ON DUPLICATE KEY UPDATE USER_GMAIL = USER_GMAIL
 ";
-executeQuery($db, $sql, [
+executeQuery($sql, [
 	$_POST['USER_GMAIL'],
 	$_POST['USER_NAME']
 ]);
@@ -24,7 +24,7 @@ include 'sub_setProfilepic.php';
 
 //========================================================== select user session data
 $sql = "SELECT USER_ID, USER_IMAGE, USER_GMAIL FROM USER WHERE USER_GMAIL = ?";
-$user = executeQuery($db, $sql, [$_POST['USER_GMAIL']])[0];
+$user = executeQuery($sql, [$_POST['USER_GMAIL']])[0];
 
 //========================================================== output
 echo json_encode([

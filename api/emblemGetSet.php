@@ -22,7 +22,7 @@ $sql = "
 	WHERE RESULT_ARENA_ID = ?
 	ORDER BY RESULT_CREATEDDATE, RESULT_ID
 ";
-$r = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
+$r = executeQuery($sql, [$_POST['ARENA_ID']]);
 
 for($i=0; $i<count($r); $i++) {
 	

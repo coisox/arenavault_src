@@ -1,10 +1,16 @@
 <template>
 	<div class="p-absolute page">
         <GoogleLogin :params="params" :onSuccess="onSuccess" :onFailure="onFailure" class="btn-google btn-outline outline-white">Google Login</GoogleLogin>
+        <div class="version w-100 text-center py-10 white dimm">{{version}}</div>
 	</div>
 </template>
 
 <style scoped>
+    .version {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
 	.page {
         background: url('/img/login.svg') no-repeat center center fixed; 
         background-size: cover;
@@ -27,7 +33,7 @@ export default {
 	data() {
 		return {
             params: {
-                client_id: "101148444110-h16o1ff180ed4at62auk00tojrq5t0jn.apps.googleusercontent.com"
+                client_id: "101148444110-ehmh0l9cmo50bs4qdd45p8k9927qfhca.apps.googleusercontent.com"
             },
             renderParams: {
                 width: 250,
@@ -36,7 +42,7 @@ export default {
             },
 		};
     },
-    props: ['session', 'apiurl'],
+    props: ['session', 'apiurl', 'version'],
     components: {
         GoogleLogin
     },
@@ -47,6 +53,8 @@ export default {
             formData.append('USER_GMAIL', googleUser.getBasicProfile().getEmail())
             formData.append('USER_NAME', googleUser.getBasicProfile().getName())
             formData.append('USER_IMAGE', googleUser.getBasicProfile().getImageUrl())
+
+            console.log('formData: ', googleUser.getBasicProfile().getName())
 
             fetch(self.apiurl+'login.php', {
                 method: 'post',

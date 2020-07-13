@@ -34,13 +34,13 @@
 			<template v-for="(item, index) in filteredResults">
                 <div v-if="index==0 || item.CREATEDDATE!=filteredResults[index-1].CREATEDDATE" class="table-header d-flex center" :key="'date'+item.RESULT_ID">{{item.CREATEDDATE}}</div>
 				<div class="table-row" @click="showModalResult(item)" :key="item.RESULT_ID">
-					<div class="table-col-4 truncate text-right">
+					<div class="table-col-4 truncate text-left">
 						<div class="truncate">{{item.RESULT_P1_PLAYER_NAME}}</div>
 					</div>
                     <div class="table-col-2 text-center">
 						{{item.RESULT_OVERALL}}
 					</div>
-                    <div class="table-col-4 truncate">
+                    <div class="table-col-4 truncate text-right">
 						<div class="truncate">{{item.RESULT_P2_PLAYER_NAME}}</div>
 					</div>
 				</div>
@@ -86,9 +86,6 @@
 </template>
 
 <style scoped>
-	#modalResult .table-col-1 {
-		margin-left: 5px;
-	}
 	#modalResult input {
 		text-align: center;
 		border: 1px solid grey;

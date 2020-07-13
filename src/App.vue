@@ -3,10 +3,11 @@
         <template v-if="isMobile" >
 		    <router-view @childLogout="logout" @updateSession="updateSession" @updateTips="updateTips" @showToast="showToast" :session="session" :tips="tips" :apiurl="apiurl" :version="version"></router-view>
             <div class="footer" v-if="$route.path!='/login'">
-                <div :class="{'red':$route.path=='/standing', 'dimm':!session.ARENA_ID}" @click="goto('/standing', !session.ARENA_ID)"><i class="material-icons-outlined">local_convenience_store</i><div>Standing</div></div>
+                <div :class="{'red':$route.path=='/standing', 'dimm':!session.ARENA_ID}" @click="goto('/standing', !session.ARENA_ID)"><i class="material-icons-outlined" style="transform:scaleY(1.25)">local_convenience_store</i><div>Standing</div></div>
                 <div :class="{'purple':$route.path=='/result', 'dimm':!session.ARENA_ID || session.ARENA_ID=='000000'}" @click="goto('/result', !session.ARENA_ID || session.ARENA_ID=='000000')"><i class="material-icons-outlined">offline_bolt</i><div>Result</div></div>
                 <div :class="{'orange':$route.path=='/emblem', 'dimm':!session.ARENA_ID || session.ARENA_ID=='000000'}" @click="goto('/emblem', !session.ARENA_ID || session.ARENA_ID=='000000')"><i class="material-icons-outlined">whatshot</i><div>Emblem</div></div>
-                <div :class="{'green':$route.path=='/arena'}" @click="goto('/arena')"><i class="material-icons-outlined">account_balance</i><div>Arena</div></div>
+                <div :class="{'green':$route.path=='/player'}" v-if="session.ARENA_OWNER" @click="goto('/player', !session.ARENA_ID || session.ARENA_ID=='000000')"><i class="material-icons-outlined">sentiment_satisfied</i><div>Player</div></div>
+                <div :class="{'green':$route.path=='/arena'}" @click="goto('/arena')"><i class="material-icons-outlined" style="transform:translateY(1px)">account_balance</i><div>Arena</div></div>
             </div>
             <div class="toast" :class="{'active':toast.show}">{{toast.text}}</div>
         </template>
@@ -70,6 +71,7 @@ html, body { margin: 0; padding: 0; }
 .d-inline-block { display: inline-block; }
 .d-flex { display: flex; }
 .d-flex.center { justify-content: center; align-items: center; }
+.d-flex.flex-end { justify-content: flex-end; align-items: center; }
 .d-flex.space-between { justify-content: space-between; align-items: center; }
 
 .float-left { float: left; }
@@ -109,26 +111,20 @@ html, body { margin: 0; padding: 0; }
 .opacity-0 { opacity: 0; }
 .w-100 { width: 100%; }
 
+.red { color: #E72A3D; }
+.purple { color: #9051DD; }
+.orange { color: #FF8F19; }
+.green { color: #655BF1; }
 .white { color: white; }
-.blue { color: #5A78D9; }
-.orange { color: #FCB925; }
-.purple { color: #956EE2; }
-.green { color: #6CCE25; }
-.red { color: #E9203E; }
-.gold { color: gold; }
-.silver { color: silver; }
-.bronze { color: #CD7F32; }
-.bg-gradient-blue { background: linear-gradient(180deg, #5A78D9 0%, #49A7EB 100%) !important; }
-.bg-gradient-orange { background: linear-gradient(180deg, #FCB925 0%, #FFE136 100%) !important; }
-.bg-gradient-purple { background: linear-gradient(180deg, #956EE2 0%, #C26EE2 100%) !important; }
-.bg-gradient-green { background: linear-gradient(180deg, #6CCE25 0%, #B4EB45 100%) !important; }
-.bg-gradient-red { background: linear-gradient(180deg, #E9203E 0%, #FF316E 100%) !important; }
+.bg-gradient-red { background: linear-gradient(180deg, #E72A3D 0%, #F37764 100%) !important; }
+.bg-gradient-purple { background: linear-gradient(180deg, #9051DD 0%, #BD65D7 100%) !important; }
+.bg-gradient-orange { background: linear-gradient(180deg, #FF8F19 0%, #FFBF1B 100%) !important; }
+.bg-gradient-green { background: linear-gradient(180deg, #655BF1 0%, #6CC5F4 100%) !important; }
 .bg-gradient-grey { background: linear-gradient(180deg, #E0E0E0 0%, #EBEBEB 100%) !important; }
-.outline-blue { border-color: #5A78D9; }
-.outline-orange { border-color: #FCB925; }
-.outline-purple { border-color: #956EE2; }
-.outline-green { border-color: #6CCE25; }
-.outline-red { border-color: #E9203E; }
+.outline-red { border-color: #E72A3D; }
+.outline-purple { border-color: #9051DD; }
+.outline-orange { border-color: #FF8F19; }
+.outline-green { border-color: #655BF1; }
 
 body, button i, input, select, .table-row {
     color: #616161;
@@ -146,13 +142,14 @@ select, input, button {
 }
 select, input {
     border-bottom: 1px solid grey;
+    background-color: white;
 }
 button, .toast {
     border-radius: 6px;
     padding: 10px 10px;
 }
 .toast {
-    background-color: #E9203E;
+    background-color: #E72A3D;
     color: white;
     position: fixed;
     top: 20px;
@@ -195,6 +192,7 @@ button, .toast {
     box-sizing: border-box;
     display: flex;
     align-items: center;
+    min-height: 52px;
 }
 .table-header {
     background-color: #616161;
@@ -210,7 +208,20 @@ button, .toast {
 .table-row + .table-row {
     margin-top: 10px;
 }
+/* .table-col-1 { flex: 0 0 8.33%; }
+.table-col-2 { flex: 0 0 16.66%; }
+.table-col-3 { flex: 0 0 25.00%; }
+.table-col-4 { flex: 0 0 33.33%; }
+.table-col-5 { flex: 0 0 41.66%; }
+.table-col-6 { flex: 0 0 50.00%; }
+.table-col-7 { flex: 0 0 58.33%; }
+.table-col-8 { flex: 0 0 66.66%; }
+.table-col-9 { flex: 0 0 75.00%; }
+.table-col-10 { flex: 0 0 83.33%; }
+.table-col-11 { flex: 0 0 91.66%; }
+.table-col-12 { flex: 0 0 100%; } */
 .table-col-1 { flex: 0 0 10%; }
+.table-col-1-5 { flex: 0 0 15%; }
 .table-col-2 { flex: 0 0 20%; }
 .table-col-3 { flex: 0 0 30%; }
 .table-col-4 { flex: 0 0 40%; }
@@ -262,6 +273,8 @@ button, .toast {
 
 .tips-1, .tips-2, .tips-3, .tips-4, .tips-5 {
     padding: 0 50px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* ============================================================================== modal */
@@ -323,10 +336,11 @@ export default {
 	name: "App",
 	data() {
 		return {
-            version: 'v20200307',
+            version: 'v20200713',
             session: {},
             tips: {},
-            apiurl: location.href.indexOf('localhost')>-1?'http://127.0.0.1//my/arenavault/api/':'https://coisox.toyyib.la/',
+            // apiurl: location.href.indexOf('localhost')>-1?'http://127.0.0.1//my/arenavault/api/':'https://coisox.toyyib.la/arenavault/',
+            apiurl: 'http://3.1.74.150/arenavault/',
             isMobile: false,
             toast: {
                 show: false,

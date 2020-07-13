@@ -25,13 +25,13 @@
 			<div class="table-header p-fixed">
 				<div class="table-col-1">#</div>
                 <template v-if="session.ARENA_ID=='000000'">
-                    <div class="table-col-4">PLAYER</div>
-                    <div class="table-col-2 text-center">E</div>
-                    <div class="table-col-2 text-center">G</div>
-                    <div class="table-col-1 text-center">%</div>
+                    <div class="table-col-max">PLAYER</div>
+                    <div class="table-col-1-5 text-center">E</div>
+                    <div class="table-col-1-5 text-center">G</div>
+                    <div class="table-col-1-5 text-center">%</div>
                 </template>
                 <template v-else>
-				    <div class="table-col-5">PLAYER</div>
+				    <div class="table-col-max">PLAYER</div>
                     <div class="table-col-1 text-center"></div><!-- icon level -->
                     <div class="table-col-1 text-center">G</div>
                     <div class="table-col-1 text-center">W</div>
@@ -41,13 +41,13 @@
 			<div class="table-row" v-for="(item, index) in standings" :key="item.USER_ID" @click="showModalProfile(item.USER_ID)">
 				<div class="table-col-1">{{index+1}}</div>
                 <template v-if="session.ARENA_ID=='000000'">
-				    <div class="table-col-4 truncate">{{item.USER_NAME}}</div>
-                    <div class="table-col-2 text-center">{{item.ELO}}</div>
-                    <div class="table-col-2 text-center">{{item.GAME}}</div>
-                    <div class="table-col-1 text-center">{{item.PERCENTAGE}}</div>
+				    <div class="table-col-max truncate">{{item.USER_NAME}}</div>
+                    <div class="table-col-1-5 text-center">{{item.ELO}}</div>
+                    <div class="table-col-1-5 text-center">{{item.GAME}}</div>
+                    <div class="table-col-1-5 text-center">{{item.PERCENTAGE}}</div>
                 </template>
                 <template v-else>
-                    <div class="table-col-5 truncate">{{item.USER_NAME}}</div>
+                    <div class="table-col-max truncate">{{item.USER_NAME}}</div>
                     <div class="table-col-1 p-relative"><img v-if="item.LEVEL" class="icon-level" :src="'img/icons8-'+item.LEVEL+'-50.png'"></div>
                     <div class="table-col-1 text-center">{{item.WIN+item.LOSE}}</div>
                     <div class="table-col-1 text-center">{{item.WIN}}</div>
@@ -66,7 +66,7 @@
 					{{modalProfile.USER_NAME}}<br><br>
 					<div class="p-relative d-inline-block">
 						<img class="profilepic" :src="modalProfile.USER_IMAGE">
-						<input v-if="modalProfile.USER_ID==session.USER_ID" id="inputProfilepic" type="file" accept="image/*" @change="uploadProfilepic">
+						<input v-if="modalProfile.USER_ID==session.USER_ID || session.USER_ID==1" id="inputProfilepic" type="file" accept="image/jpeg" @change="uploadProfilepic">
 					</div>
 				</div>
                 <table width="100%" border="0" cellspacing="0" class="mt-10">
@@ -77,8 +77,6 @@
                                 <i v-for="i in (modalProfile.WIN_STREAK)" class="material-icons-outlined red" :key="'s'+i">star</i>
                                 <i v-for="i in (5-modalProfile.WIN_STREAK)" class="material-icons-outlined" :key="'o'+i">star_outline</i>
                             </div>
-                            <!-- <span>Win {{modalProfile.WIN_STREAK>1?modalProfile.WIN_STREAK:0}}</span>
-                            <span>Lose {{modalProfile.LOSE_STREAK>1?modalProfile.LOSE_STREAK:0}}</span> -->
                         </td>
                     </tr>
                     <tr v-for="(value, key) in modalRate.type" :key="key" @click="showModalRate">
@@ -99,21 +97,19 @@
 				<i class="material-icons-outlined btn-close" @click="modalRate.show=false">close</i>
 				<div class="modal-header red truncate">{{modalProfile.USER_NAME}}</div>
 				<div class="modal-row">Your review for this player</div>
-				<div v-for="(value, key) in modalRate.type" class="modal-row d-flex space-between" :key="key">
-					<div>{{key}}</div>
-					<div v-if="modalRate.show" style="margin:0 -2px">
-						<i v-for="i in modalRate.type[key]" class="material-icons-outlined red" :key="'s'+i" @click="modalRate.type[key]=i">star</i>
-						<i v-for="i in (5-modalRate.type[key])" class="material-icons-outlined" :key="'o'+i" @click="modalRate.type[key]=i+modalRate.type[key]">star_outline</i>
-					</div>	
-				</div>
-				<!-- <template v-for="(value, key) in modalRate.type">
-					<div class="modal-row d-flex center" :class="{'mt-20':key=='ATTACK'}" :key="key">
-						<div class="table-col-4 text-left">{{key}}</div>
-						<div class="table-col-max d-flex">
-							<button v-for="r in [1,2,3]" :key="r" @click="modalRate.type[key]=r" :class="{'bg-gradient-red white':modalRate.type[key]==r, 'bg-gradient-grey':modalRate.type[key]!=r}">{{r}}</button>
-						</div>
-					</div>
-				</template> -->
+
+                <table width="100%" border="0" cellspacing="0">
+                    <tr v-for="(value, key) in modalRate.type" :key="key">
+                        <td>{{key}}</td>
+                        <td v-if="modalRate.show">
+                            <div class="d-flex space-between" style="margin:0 -2px">
+                                <i v-for="i in modalRate.type[key]" class="material-icons-outlined red" :key="'s'+i" @click="modalRate.type[key]=i">star</i>
+                                <i v-for="i in (5-modalRate.type[key])" class="material-icons-outlined" :key="'o'+i" @click="modalRate.type[key]=i+modalRate.type[key]">star_outline</i>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
 				<div class="divider mt-10"></div>
 				<div class="modal-footer d-flex center">
 					<button class="bg-gradient-red" @click="saveModalRate"><i class="material-icons-outlined v-middle white">check</i> <span class="v-middle white">SAVE</span></button>
@@ -123,8 +119,8 @@
 
 		<div class="modal-overlay" :class="{'active':modalTipsProfile.show}" @click.self="modalTipsProfile.show=false">
 			<i class="material-icons-outlined btn-close white" @click="modalTipsProfile.show=false">close</i>
-			<div class="p-absolute white tips-1 text-center"><img src="img/tips_click.svg"><br>Click here to change profilepic if this player is you.</div>
-			<div class="p-absolute white tips-2 text-center">
+			<div class="p-fixed white tips-1 text-center"><img src="img/tips_click.svg"><br>Click here to change profilepic if this player is you.</div>
+			<div class="p-fixed white tips-2 text-center">
 				<img src="img/tips_click.svg"><br>
 				Click here to review player including yourself. Player stats are based on average of all reviews.
 			</div>
@@ -132,9 +128,9 @@
 
 		<div class="modal-overlay" :class="{'active':modalTipsStanding.show}" @click.self="modalTipsStanding.show=false">
 			<i class="material-icons-outlined btn-close white" @click="modalTipsStanding.show=false">close</i>
-			<div class="p-absolute white tips-3 text-center"><img src="img/tips_arrow.svg"><br>This is arena's completed matches percentage.</div>
-			<div class="p-absolute white tips-4 text-center"><img src="img/tips_click.svg"><br>Click on player's name to see profile.</div>
-			<!-- <div class="p-absolute white tips-4 text-center"><img src="img/tips_arrow.svg"><br>Player's standing is ordered by number of game win minus lose, followed by number of set win minus lose.<br><br>Players that yet to play will be placed at bottom.<br><br>Click on player's name to see profile.</div> -->
+			<div class="p-fixed white tips-3 text-center"><img src="img/tips_arrow.svg"><br>This is arena's completed matches percentage.</div>
+			<div class="p-fixed white tips-4 text-center"><img src="img/tips_click.svg"><br>Click on player's name to see profile.</div>
+			<!-- <div class="p-fixed white tips-4 text-center"><img src="img/tips_arrow.svg"><br>Player's standing is ordered by number of game win minus lose, followed by number of set win minus lose.<br><br>Players that yet to play will be placed at bottom.<br><br>Click on player's name to see profile.</div> -->
 		</div>
 
 	</div>
@@ -150,16 +146,16 @@
 </style>
 <style scoped>
 	.tips-1 {
-		margin-top: 118px;
+		top: 118px;
 	}
 	.tips-2 {
-		margin-top: 295px;
+		top: 295px;
 	}
 	.tips-3 {
-		margin-top: 50px;
+		top: 50px;
 	}
 	.tips-4 {
-		margin-top: 250px;
+		top: 250px;
 	}
     table td {
         padding: 5px 0;
@@ -169,7 +165,7 @@
         width: 50%;
     }
 	.table-header + .table-row {
-		margin-top: 57px;
+		margin-top: 62px;
 	}
 	.icon-level {
 		position: absolute;
@@ -191,6 +187,9 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 	}
+    .modal {
+		margin-top: 24px;
+	}
 	.modal-header {
 		z-index: 2;
 	}
@@ -205,33 +204,12 @@
         position: absolute;
         top: 165px;
         left: 50%;
-        width: calc(100vw - 120px);
+        height: 240px;
         -webkit-transform: translateX(-50%);
         transform: translateX(-50%);
         opacity: .07;
         z-index: 1;
         pointer-events: none;
-	}
-	[class^=xiom] {
-		width: calc(100vw - 88px);
-		height: calc(7.5vw - 6.6px);
-		background-size: 102%;
-		background-repeat: no-repeat;
-		background-position: center center;
-	}
-	.xiom-0 { background-image: url(/img/xiom_0.svg) }
-	.xiom-1 { background-image: url(/img/xiom_1.svg) }
-	.xiom-2 { background-image: url(/img/xiom_2.svg) }
-	.xiom-3 { background-image: url(/img/xiom_3.svg) }
-	.stat-minmax {
-		width: 100%;
-		margin-top: 15px;
-	}
-	.stat-minmax span {
-		background-color: white;
-	}
-	.modal {
-		margin-top: 24px;
 	}
 </style>
 
@@ -363,7 +341,7 @@ export default {
 
 					//========================================================== upload
 					var formData = new FormData()
-					formData.append('USER_GMAIL', self.session.USER_GMAIL)
+					formData.append('USER_ID', self.modalProfile.USER_ID)
 					formData.append('USER_IMAGE', dataURI)
 
 					fetch(self.apiurl+'profileGetSet.php', {

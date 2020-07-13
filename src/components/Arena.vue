@@ -21,8 +21,8 @@
 
 		<div class="content">
 			<div class="table-row" v-for="item in arenas" :key="item.ARENA_ID">
-				<div class="table-col-7" @click="activateArena(item)">{{item.ARENA_NAME}}</div>
-				<div class="table-col-3 text-right">
+				<div class="table-col-max" @click="activateArena(item)">{{item.ARENA_NAME}}</div>
+				<div class="table-col-4 text-right">
 					<i v-if="item.ARENA_ID!='000000'" class="material-icons-outlined red" @click="showModalShare(item.ARENA_ID, item.ARENA_NAME)">share</i>
 					<template v-if="item.IS_OWNER">
 						<i class="material-icons-outlined red" @click="showModalArena(item.ARENA_ID, item.ARENA_NAME)">create</i>
@@ -55,9 +55,6 @@
 					<qrcode :value="modalShare.ARENA_ID" :options="{width:200, margin:0}"></qrcode>
 					<div class="mt-10">{{modalShare.ARENA_ID}}</div>
 				</div>
-				<div class="modal-footer d-flex center">
-					<button class="bg-gradient-orange" @click="modalShare.show=false"><i class="material-icons-outlined v-middle white">close</i> <span class="v-middle white">CLOSE</span></button>
-				</div>
 			</div>
 		</div>
 
@@ -78,7 +75,7 @@
 
 		<div class="modal-overlay" :class="{'active':modalTipsArena.show}" @click.self="modalTipsArena.show=false">
 			<i class="material-icons-outlined btn-close white" @click="modalTipsArena.show=false">close</i>
-			<div class="p-absolute white tips-1 text-center"><img src="img/tips_click.svg"><br>After you add arena into your list (either through add, scan or type), you must click on it to activate.<br><br>You can come back here anytime to switch to different arena (if more than 1 arena listed).</div>
+			<div class="p-fixed white tips-1 text-center"><img src="img/tips_click.svg"><br>After you add arena into your list (either through add, scan or type), you must click on it to activate.<br><br>You can come back here anytime to switch to different arena (if more than 1 arena listed).</div>
 		</div>
 
 	</div>
@@ -89,7 +86,7 @@
 		margin-left: 10px;
 	}
 	.tips-1 {
-		margin-top: 135px;
+		top: 135px;
 	}
 </style>
 
@@ -203,7 +200,8 @@ export default {
 					self.modalCode.show = false
 				}
 				else {
-					console.log('Fail to get arena')
+					self.$emit('showToast', 'Invalid arena code')
+					//console.log('Invalid arena code')
 				}
 			})
 		},

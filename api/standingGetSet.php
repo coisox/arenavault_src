@@ -66,7 +66,7 @@ $sql = "
 		AND PLAYER_ARENA_ID = ?
 	ORDER BY USER_NAME
 ";
-$rs = executeQuery($db, $sql, [$_POST['PLAYER_ID'], $_POST['ARENA_ID']]);
+$rs = executeQuery($sql, [$_POST['PLAYER_ID'], $_POST['ARENA_ID']]);
 
 for($p=0; $p<count($rs); $p++) {
 	$players[$rs[$p]['PLAYER_ID']] = [
@@ -101,7 +101,7 @@ $sql = "
 	ORDER BY
 		RESULT_CREATEDDATE
 ";
-$results = executeQuery($db, $sql, [$_POST['ARENA_ID']]);
+$results = executeQuery($sql, [$_POST['ARENA_ID']]);
 
 //================================================================== massage players
 if($results) {

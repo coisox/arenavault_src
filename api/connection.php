@@ -3,7 +3,7 @@ header("Access-Control-Allow-Origin: *");
 error_reporting(E_WARNING | E_ERROR | E_PARSE);
 define('APP_ENVIRONMENT', 'stg');
 
-$db = new mysqli('127.0.0.1', 'root', '', 'arenavault');
+$conn = new mysqli('127.0.0.1', 'admin', 'Xs2mysql_admin', 'arenavault');
 if(mysqli_connect_errno()) {
 	$timestamp = date("YmdHis");
 	file_put_contents("log/error.log", $timestamp . "\t\t" . 'Connection error: '. mysqli_connect_errno() . PHP_EOL, FILE_APPEND);
@@ -11,7 +11,8 @@ if(mysqli_connect_errno()) {
 	die();
 }
 
-function executeQuery($conn, $sql, $params=[]) {
+function executeQuery($sql, $params=[]) {
+	global $conn;
 	$stmt = $conn->prepare($sql);
 
 	if($stmt === false) {
